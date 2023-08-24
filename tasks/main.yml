@@ -1,12 +1,9 @@
 ---
 - name: Prepare system
-  include: prepare.yml
-
+  ansible.builtin.import_task: prepare.yml
 - name: Install NiFi Registry
-  include: install.yml
-
+  ansible.builtin.import_task: install.yml
 - name: Customize NiFi Registry
-  include: customize.yml
-
+  ansible.builtin.import_task: customize.yml
 - name: Run NiFi Registry as system service
-  include: run.yml
+  ansible.builtin.import_task: run.yml

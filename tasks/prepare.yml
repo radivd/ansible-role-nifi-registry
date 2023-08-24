@@ -1,27 +1,29 @@
 ---
 - name: Create NiFi Registry group
-  group:
+  ansible.builtin.group:
     name: "{{ nifi_registry_group }}"
-    state: "present"
+    state: present
     system: "yes"
 
 - name: Create NiFi Registry user
-  user:
+  ansible.builtin.user:
     name: "{{ nifi_registry_user }}"
     groups: "{{ nifi_registry_group }}"
     append: "yes"
-    state: "present"
+    state: present
     create_home: "no"
     system: "yes"
 
 - name: Create install directory
-  file:
+  ansible.builtin.file:
     path: "{{ nifi_registry_config_dirs.install }}"
-    state: "directory"
+    state: directory
     owner: "{{ nifi_registry_user }}"
     group: "{{ nifi_registry_group }}"
+    mode: "0750"
 
 - name: Set NiFi Registry home
-  copy:
-    dest: "/etc/profile.d/nifi-registry-home.sh"
-    content: "export NIFI_REGISTRY_HOME={{ nifi_registry_config_dirs.home }}"
+  ansible.builtin.copy:
+    dest: /etc/profile.d/nifi-registry-home.sh
+    content: export NIFI_REGISTRY_HOME={{ nifi_registry_config_dirs.home }}
+    mode: "0750"

@@ -1,23 +1,24 @@
 ---
 - name: Create shared resources directory
-  file:
+  ansible.builtin.file:
     path: "{{ nifi_registry_config_dirs.external_config }}"
-    state: "directory"
+    state: directory
     owner: "{{ nifi_registry_user }}"
     group: "{{ nifi_registry_group }}"
+    mode: "0750"
 
 - name: Update nifi-registry.properties
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ nifi_registry_config_dirs.home }}/conf/nifi-registry.properties"
     line: "{{ item.key }}={{ item.value }}"
-    regexp: "^{{ item.key }}"
+    regexp: ^{{ item.key }}
   with_dict: "{{ nifi_registry_properties }}"
 
 - name: Update bootstrap.conf
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ nifi_registry_config_dirs.home }}/conf/bootstrap.conf"
     line: "{{ item.key }}={{ item.value }}"
-    regexp: "^{{ item.key }}"
+    regexp: ^{{ item.key }}
   with_dict: "{{ bootstrap }}"
 
 - name: Update logback.xml
@@ -28,11 +29,12 @@
   with_dict: "{{ logback }}"
 
 - name: Update identity-providers.xml
+  when: identity_providers['/identityProviders/provider/identifier'] | length
   block:
     - name: Uncomment block in identity-providers.xml
-      replace:
+      ansible.builtin.replace:
         path: "{{ nifi_registry_config_dirs.home }}/conf/identity-providers.xml"
-        regexp: "^.*To enable the {{ identity_providers['/identityProviders/provider/identifier'] }}.*$"
+        regexp: ^.*To enable the {{ identity_providers['/identityProviders/provider/identifier'] }}.*$
         replace: ""
     - name: Update properties in identity-providers.xml
       xml:
@@ -40,14 +42,14 @@
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
       with_dict: "{{ identity_providers }}"
-  when: identity_providers['/identityProviders/provider/identifier'] | length
 
 - name: Update authorizers.xml
+  when: authorizers['/authorizers/userGroupProvider/identifier'] | length
   block:
     - name: Uncomment block in authorizers.xml
-      replace:
+      ansible.builtin.replace:
         path: "{{ nifi_registry_config_dirs.home }}/conf/authorizers.xml"
-        regexp: "^.*To enable the {{ authorizers['/authorizers/userGroupProvider/identifier'] }}.*$"
+        regexp: ^.*To enable the {{ authorizers['/authorizers/userGroupProvider/identifier'] }}.*$
         replace: ""
     - name: Update properties in authorizers.xml
       xml:
@@ -55,7 +57,6 @@
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
       with_dict: "{{ authorizers }}"
-  when: authorizers['/authorizers/userGroupProvider/identifier'] | length
 
 - name: Update providers.xml
   xml:
