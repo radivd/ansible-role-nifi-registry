@@ -29,19 +29,19 @@
   with_dict: "{{ logback }}"
 
 - name: Update identity-providers.xml
-  when: identity_providers['/identityProviders/provider/identifier'] | length
+  when: login_identity_providers['/identityProviders/provider/identifier'] | length
   block:
     - name: Uncomment block in identity-providers.xml
       ansible.builtin.replace:
         path: "{{ nifi_registry_config_dirs.home }}/conf/identity-providers.xml"
-        regexp: ^.*To enable the {{ identity_providers['/identityProviders/provider/identifier'] }}.*$
+        regexp: ^.*To enable the {{ login_identity_providers['/identityProviders/provider/identifier'] }}.*$
         replace: ""
     - name: Update properties in identity-providers.xml
       xml:
         path: "{{ nifi_registry_config_dirs.home }}/conf/identity-providers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
-      with_dict: "{{ identity_providers }}"
+      with_dict: "{{ login_identity_providers }}"
 
 - name: Update authorizers.xml
   when: authorizers['/authorizers/userGroupProvider/identifier'] | length
